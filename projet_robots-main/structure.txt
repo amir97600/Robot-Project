@@ -1,0 +1,6 @@
+Controle du robot à distance par wifi, mouvements basiques +complexes
+associé à
+Interface graphique + image de la caméra
+associé à
+Coordonnées Caméra pour indiquer aux robots où ils sont et les synchronisés
++ Programme qui communique les données de la caméra aux robots

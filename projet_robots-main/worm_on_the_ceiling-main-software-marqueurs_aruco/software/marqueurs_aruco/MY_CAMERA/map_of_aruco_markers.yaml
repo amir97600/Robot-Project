@@ -1,0 +1,54 @@
+- aruco_dictionary_id: 0
+  aruco_size: 0.03
+  map_of_aruco_markers:
+    name: Makers 1
+- id: 5
+  position:
+    - 0.03
+    - -0.03
+    - 0
+  rotation:
+    - 0
+    - 0
+    - 0
+- id: 8
+  position:
+    - 0.13
+    - -0.03
+    - 0
+  rotation:
+    - 1.2091995761561456
+    - 1.2091995761561456
+    - 1.2091995761561456
+- id: 10
+  position:
+    - 0.23
+    - -0.03
+    - 0
+  rotation:
+    - -1.2091995761561456
+    - -1.2091995761561456
+    - -1.2091995761561456
+- aruco_dictionary_id: 1
+  aruco_size: 0.05
+  map_of_aruco_markers:
+    name: Markers 2
+- id: 1
+  position:
+    - 1.03
+    - -0.03
+    - 0.1
+  rotation:
+    - 0
+    - 0
+    - 0
+- id: 8
+  position:
+    - 0.13
+    - -0.03
+    - 0
+  rotation:
+    - 1.2091995761561456
+    - 1.2091995761561456
+    - 1.2091995761561456
+

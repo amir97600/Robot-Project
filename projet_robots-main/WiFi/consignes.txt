@@ -1,0 +1,178 @@
+Pour configurer deux robots ESP32 afin de les faire bouger simultanément en utilisant la même page web, vous pouvez suivre les étapes suivantes :
+
+1)
+Assurez-vous que chaque robot ESP32 dispose d'un serveur web intégré qui peut recevoir des commandes via des requêtes HTTP. Vous pouvez utiliser des bibliothèques telles que ESPAsyncWebServer pour mettre en place un serveur web sur chaque ESP32.
+
+2)
+Assignez une adresse IP unique à chaque robot ESP32 pour les distinguer sur le réseau. Vous pouvez configurer l'adresse IP statiquement dans le code de chaque ESP32 ou utiliser un protocole de configuration réseau tel que DHCP pour attribuer dynamiquement les adresses IP.
+
+3)
+Développez une page web qui envoie les commandes aux robots ESP32. Vous pouvez utiliser des éléments HTML tels que des boutons ou des formulaires pour permettre à l'utilisateur de contrôler les mouvements des robots. Par exemple, vous pouvez avoir des boutons pour "Avancer", "Tourner à droite", "Tourner à gauche", etc.
+
+
+4)
+Utilisez JavaScript pour envoyer les commandes aux adresses IP respectives des robots ESP32 lorsqu'un bouton est cliqué ou qu'une action est déclenchée sur la page web. Vous pouvez utiliser des requêtes AJAX pour envoyer les commandes en arrière-plan.
+
+Voici un exemple simple en utilisant JavaScript avec la bibliothèque jQuery :
+
+
+function envoyerCommandeRobot(ip, commande) {
+    $.get("http://" + ip + "/commande", { commande: commande })
+        .done(function(response) {
+            console.log("Commande envoyée au robot " + ip);
+        })
+        .fail(function() {
+            console.error("Erreur lors de l'envoi de la commande au robot " + ip);
+        });
+}
+
+// Exemple d'utilisation
+$("#btn_avancer").click(function() {
+    envoyerCommandeRobot("192.168.1.100", "avancer");
+    envoyerCommandeRobot("192.168.1.101", "avancer");
+});
+
+$("#btn_tourner_droite").click(function() {
+    envoyerCommandeRobot("192.168.1.100", "tourner_droite");
+    envoyerCommandeRobot("192.168.1.101", "tourner_droite");
+});
+
+// Ajoutez d'autres fonctions pour les autres mouvements des robots
+
+
+
+
+Dans cet exemple, les fonctions envoyerCommandeRobot envoient des requêtes GET aux adresses IP des robots ESP32 avec la commande correspondante. Vous pouvez appeler ces fonctions pour chaque mouvement des robots.
+
+Assurez-vous de remplacer les adresses IP (192.168.1.100, 192.168.1.101) par les adresses IP réelles de vos robots ESP32.
+
+5)
+Déployez la page web sur un serveur accessible depuis les robots ESP32. Vous pouvez utiliser un serveur local ou un service d'hébergement web pour cela.
+
+Avec cette configuration, lorsque vous cliquez sur les boutons ou effectuez des actions sur la page web, les commandes correspondantes seront envoyées simultanément aux deux robots ESP32, leur permettant de se déplacer de manière synchronisée.
+
+
+
+
+
+
+
+Pour réaliser les étapes 1 et 2 
+
+
+
+
+Bien sûr ! Voici comment réaliser concrètement les étapes 1 et 2 pour configurer deux robots ESP32 avec un serveur web intégré et des adresses IP uniques :
+
+Étape 1: Configurer un serveur web sur chaque ESP32
+
+1)
+Assurez-vous d'avoir installé la bibliothèque ESPAsyncWebServer dans votre environnement de développement Arduino. Vous pouvez l'installer en suivant ces étapes :
+
+Ouvrez l'IDE Arduino.
+Allez dans "Croquis" -> "Inclure une bibliothèque" -> "Gérer les bibliothèques".
+Recherchez "ESPAsyncWebServer" et installez la bibliothèque proposée par "me-no-dev".
+
+
+2)
+
+Dans votre code Arduino pour chaque ESP32, incluez les bibliothèques nécessaires et déclarez un objet de type AsyncWebServer :
+
+#include <WiFi.h>
+#include <ESPAsyncWebServer.h>
+
+const char* ssid = "Votre_SSID";         // Remplacez par le SSID de votre réseau WiFi
+const char* password = "Votre_Mot_De_Passe";  // Remplacez par le mot de passe de votre réseau WiFi
+
+AsyncWebServer server(80);  // Créez un objet de type AsyncWebServer
+
+
+
+3)
+
+Dans la fonction setup(), connectez votre ESP32 au réseau WiFi :
+
+
+void setup() {
+    // Connexion au réseau WiFi
+    WiFi.begin(ssid, password);
+    while (WiFi.status() != WL_CONNECTED) {
+        delay(1000);
+        Serial.print(".");
+    }
+    Serial.println("");
+    Serial.print("WiFi connecté à ");
+    Serial.println(ssid);
+}
+
+
+
+
+4)
+
+
+Configurez les routes et les gestionnaires de requêtes pour votre serveur web. Par exemple, vous pouvez créer une route /commande qui recevra les commandes de mouvement des robots :
+
+
+
+void setup() {
+    // ...
+    
+    // Définissez les routes et les gestionnaires de requêtes
+    server.on("/commande", HTTP_GET, [](AsyncWebServerRequest* request){
+        String commande = request->getParam("commande")->value();
+        // Traitez la commande reçue ici (par exemple, contrôlez le mouvement du robot)
+        // ...
+        request->send(200, "text/plain", "Commande reçue : " + commande);
+    });
+
+    // Démarrez le serveur
+    server.begin();
+}
+
+Dans cet exemple, la route /commande est définie pour les requêtes HTTP GET et un gestionnaire de requêtes anonyme est utilisé pour traiter la commande reçue. Vous pouvez ajouter votre logique spécifique pour contrôler le mouvement des robots en fonction de la commande reçue.
+
+
+Étape 2: Assigner des adresses IP uniques à chaque ESP32
+
+1)
+Dans votre code Arduino pour chaque ESP32, après la connexion au réseau WiFi, vous pouvez spécifier une adresse IP statique pour chaque ESP32 en utilisant la fonction WiFi.config() :
+
+
+void setup() {
+    // Connexion au réseau WiFi
+    WiFi.begin(ssid, password);
+    while (WiFi.status() != WL_CONNECTED) {
+        delay(1000);
+        Serial.print(".");
+    }
+    Serial.println("");
+    Serial.print("WiFi connecté à ");
+    Serial.println(ssid);
+
+    // Spécifiez l'adresse IP statique pour cet ESP32
+    IPAddress ip(192, 168, 1, 100);   // Remplacez par l'adresse IP souhaitée
+    IPAddress gateway(192, 168, 1, 1);   // Remplacez par l'adresse IP de votre passerelle
+    IPAddress subnet(255, 255, 255, 0);  // Remplacez par votre masque de sous-réseau
+    WiFi.config(ip, gateway, subnet);
+}
+
+Répétez cette étape pour chaque ESP32 en spécifiant une adresse IP différente pour chacun.
+
+2)
+
+Assurez-vous que les adresses IP que vous attribuez à chaque ESP32 sont uniques et correspondent à votre réseau local. Assurez-vous également de configurer la passerelle et le masque de sous-réseau correctement.
+
+Une fois que vous avez réalisé les étapes 1 et 2 pour chaque ESP32, vous aurez configuré un serveur web sur chaque ESP32 et leur aurez attribué des adresses IP uniques. Les robots ESP32 pourront maintenant recevoir des commandes de mouvement simultanément via le réseau en utilisant la même page web.
+
+
+
+
+
+
+
+
+
+
+
+

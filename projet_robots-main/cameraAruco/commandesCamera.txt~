@@ -1,0 +1,55 @@
+Find your camera 
+================
+
+In this README, all example use an ELP High resolution 8 megapixel Sony IMX179 
+wide angle USB Camera Module with 2.1mm lens 
+(ELP-USB8MP02G-L21 - www.elpcctv.com).
+
+Plug your USB camera.
+
+Check your USB camera is known by your system by typing : 
+lsusb
+
+For example, you can obtain that type of information, for a USB camera : 
+Bus 001 Device 012: ID 05a3:9230 ARC International Camera
+
+To obtain mor information, you can type 
+sudo dmesg
+
+You should also obtain that kind of information :
+[23893.630388] usb 1-1: new high-speed USB device number 12 using xhci_hcd
+[23893.846185] usb 1-1: New USB device found, idVendor=05a3, idProduct=9230, \
+bcdDevice= 1.00
+[23893.846192] usb 1-1: New USB device strings: Mfr=2, Product=1, SerialNumber=0
+[23893.846238] usb 1-1: Product: USB 2.0 Camera
+[23893.846241] usb 1-1: Manufacturer: HD Camera Manufacturer
+[23893.853009] uvcvideo: Found UVC 1.00 device USB 2.0 Camera (05a3:9230)
+[23893.910712] input: USB 2.0 Camera: HD USB Camera as \
+/devices/pci0000:00/0000:00:14.0/usb1/1-1/1-1:1.0/input/input4
+
+To find the video stream of your camera, just type :
+v4l2-ctl --list-devices
+
+With the help of the previous informations, find your camera stream.
+
+For example, you could obtain that information :
+USB 2.0 Camera: HD USB Camera (usb-0000:00:14.0-1):
+        /dev/video2
+        /dev/video3
+        /dev/media1
+
+and the camera stream should be /dev/video2
+
+List all avalaible format for you webcam :
+ffmpeg -f v4l2 -list_formats all -i /dev/video2
+
+For example you can obtain : 
+[video4linux2,v4l2 @ 0x563c2ccfb440] Compressed:       mjpeg :          Motion-JPEG : 1920x1080 640x480 800x600 1280x720 1280x1024 320x240
+[video4linux2,v4l2 @ 0x563c2ccfb440] Raw       :     yuyv422 :           YUYV 4:2:2 : 1920x1080 640x480 800x600 1280x720 1280x1024 320x24
+
+To display a fluid video stream using a compressed format :
+ ffplay -f v4l2 -input_format mjpeg -video_size 1920x1080 -i /dev/video2 
+# Other parameters : -framerate 30 -pix_fmt mjpeg
+
+To display raw format (not fluid) :
+ffplay -f v4l2 -input_format yuyv422 -video_size 1920x1080 -i /dev/video2 

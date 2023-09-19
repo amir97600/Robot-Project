@@ -1,0 +1,38 @@
+---
+
+camera_init:
+  # Focal in x : fx = u * Zc / Xc
+  # Focal in y : fy = v * Zc / Yc
+  Xc: 0.1  # m
+  Yc: 0.1  # m
+  Zc: 0.28 # m
+  u: 381  # pixels
+  v: 381  # pixels
+
+  # center
+  cx: 960 # half width size (in pixels)
+  cy: 540 # half height size (in pixels)
+
+v4l2:
+  # To display all v4l12 controls type : 
+  # v4l2-ctl -d /dev/YOUR_VIDEO -l
+  brightness: -64  # min : -64 , max : 64
+  #brightness: 0
+  contrast: 32    # min : 0, max : 64
+  #contrast: 32
+  saturation: 60   # min : 0, max : 128
+  #saturation: 60
+  hue: 0          # min : -40, max : 40
+  #hue: 0
+  gamma: 100       # min : 72, max : 500
+  #gamma: 100
+  gain: 0         # min : 0, max : 100
+  #gain: 0
+  power_line_frequency: 1
+  #white_balance_temperature: 4600
+  sharpness: 0  # min : 0, max : 6
+  backlight_compensation: 1
+  exposure_absolute: 40
+  focus_absolute: 0
+  #exposure_auto: 1
+  

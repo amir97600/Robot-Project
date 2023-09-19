@@ -1,0 +1,370 @@
+################################################################################
+# Install dependencies and compile all the tools
+################################################################################
+
+To install the dependencies type :
+sudo apt install libopencv-dev build-essential cmake v4l-utils libv4l-dev gimp 
+sudo apt install ffmpeg
+sudo apt install python3-opencv
+
+Compile now all the tools :
+bash build.sh
+
+
+################################################################################
+# Creating markers and Charuco Board 
+################################################################################
+
+To calibrate camera, we need to create a charuco board.
+To test the result of the calibration, we need to creat somr aruco markers.
+
+You need to create a directory for your aruco boards:
+mkdir MY_BOARDS
+
+Go into your directory :
+cd MY_BOARDS
+
+Create now a charuco board (in order to calibrate your camera) :
+../build/create_charuco_board -d=0 -w=5 -h=7 --sl=200 --ml=120 charuco_d0_board_w5_h7_sl200_ml120.png
+
+  the option -d=0 setup the aruco dictionary equal to 0 (DICT_4X4_50)
+  the option -w=5 setup 5 square in X direction (width)
+  the option -h=7 setup 5 square in Y direction (height)
+  the option --sl=200 setup a square length equals to 200 pixels
+  the option --ml=120 setup a square length equals to 120 pixels
+
+Create some markers (in order to print and cut out) :
+../build/create_grid_of_aruco_to_cut_out -d=0 -w=4 -h=12 -l=200 -s=101 markers_board_d0_w4_h12_l300_s101.png
+
+  the option -d=0 setup the aruco dictionary equal to 0 (DICT_4X4_50)
+  the option -w=4 setup 4 squares in X direction (width)
+  the option -h=12 setup 5 squares in Y direction (height)
+  the option -l=200 setup a marker length equals to 200 pixels
+  the option -s=101 setup a separation wetween two consecutive marker equals to 
+                    101, one pixel is dedicated to a line separator.
+
+The last command create only 4X12 = 48 aruco marker over 50. To obtain the 
+2 last, you need the next command.
+
+../build/create_grid_of_aruco_to_cut_out -d=0 -w=5 -h=7 -l=200 -s=101 markers_board_d0_w5_h7_l300_s101.png
+
+  the option -d=0 setup the aruco dictionary equal to 0 (DICT_4X4_50)
+  the option -w=5 setup 5 squares in X direction (width)
+  the option -h=7 setup 7 squares in Y direction (height)
+  the option -l=200 setup a marker length equals to 200 pixels
+  the option -s=101 setup a separation wetween two consecutive marker equals to 
+                    101, one pixel is dedicated to a line separator.
+
+################################################################################
+# Printing markers and Charuco Board 
+################################################################################
+
+Open with Gimp the file charuco_d0_board_w5_h7_sl200_ml120.png and print your
+charuco board by using a resolution of 6 pixel/mm (resolution in X and Y).
+
+Normally, you will obtain a charuco board, with the size of the square aquals 
+to 3.33 cm and the size of the aruco marker eaquals to 2 cm.
+
+Open with Gimp the two last files : markers_board_d0_w4_h12_l300_s101.png and
+markers_board_d0_w5_h7_l300_s101.png.
+Print all the marker using the same x/y resolution of 6 pixel/mm.
+Cut out allr the markers. You can use those markers to make tests or to 
+past on object you want to localize.
+
+If you need biger markes, you can adapt all the previous values.
+
+################################################################################
+# Configurating cameras 
+################################################################################
+
+Come back to the root directroy.
+
+First copy the directory camera_example and rename it into MY_CAMERA :
+
+cp -r camera_example MY_CAMERA
+
+Nou you can move into your directory : 
+
+cd MY_CAMERA
+
+Find your camera 
+================
+
+In this README, all example use an ELP High resolution 8 megapixel Sony IMX179 
+wide angle USB Camera Module with 2.1mm lens 
+(ELP-USB8MP02G-L21 - www.elpcctv.com).
+
+Plug your USB camera.
+
+Check your USB camera is known by your system by typing : 
+lsusb
+
+For example, you can obtain that type of information, for a USB camera : 
+Bus 001 Device 012: ID 05a3:9230 ARC International Camera
+
+To obtain mor information, you can type 
+sudo dmesg
+
+You should also obtain that kind of information :
+[23893.630388] usb 1-1: new high-speed USB device number 12 using xhci_hcd
+[23893.846185] usb 1-1: New USB device found, idVendor=05a3, idProduct=9230, \
+bcdDevice= 1.00
+[23893.846192] usb 1-1: New USB device strings: Mfr=2, Product=1, SerialNumber=0
+[23893.846238] usb 1-1: Product: USB 2.0 Camera
+[23893.846241] usb 1-1: Manufacturer: HD Camera Manufacturer
+[23893.853009] uvcvideo: Found UVC 1.00 device USB 2.0 Camera (05a3:9230)
+[23893.910712] input: USB 2.0 Camera: HD USB Camera as \
+/devices/pci0000:00/0000:00:14.0/usb1/1-1/1-1:1.0/input/input4
+
+To find the video stream of your camera, just type :
+v4l2-ctl --list-devices
+
+With the help of the previous informations, find your camera stream.
+
+For example, you could obtain that information :
+USB 2.0 Camera: HD USB Camera (usb-0000:00:14.0-1):
+        /dev/video2
+        /dev/video3
+        /dev/media1
+
+and the camera stream should be /dev/video2
+
+List all avalaible format for you webcam :
+ffmpeg -f v4l2 -list_formats all -i /dev/video2
+
+For example you can obtain : 
+[video4linux2,v4l2 @ 0x563c2ccfb440] Compressed:       mjpeg :          Motion-JPEG : 1920x1080 640x480 800x600 1280x720 1280x1024 320x240
+[video4linux2,v4l2 @ 0x563c2ccfb440] Raw       :     yuyv422 :           YUYV 4:2:2 : 1920x1080 640x480 800x600 1280x720 1280x1024 320x24
+
+To display a fluid video stream using a compressed format :
+ ffplay -f v4l2 -input_format mjpeg -video_size 1920x1080 -i /dev/video2 
+# Other parameters : -framerate 30 -pix_fmt mjpeg
+
+To display raw format (not fluid) :
+ffplay -f v4l2 -input_format yuyv422 -video_size 1920x1080 -i /dev/video2 
+
+
+Display the camera
+================== 
+
+First display the image of the camera by typing :
+../build/detect_aruco_markers -d=0 --ci=2
+
+  the option -d=0 setup the aruco dictionary equal to 0 (DICT_4X4_50)
+  the option --ci=2 is setup the camera device of /dev/video2
+
+If you have some luck, an image should appear and if you present some charuco 
+boards the aruco markers should be detected.
+If you don't have luck, your camera is not well configured.
+
+In all the cases, don't stop the program and follow the next section to 
+configure the camera.
+
+Configure your camera with the help of the previous display
+===========================================================
+
+You need to configure your camera with the help of the config file 
+camera_configuration.yaml.
+
+You have to addapt camera_configruation.yaml to obtain a better image.
+You need to change the parameters brightness, contrast, saturation 
+hue and gamma according you lighting configuration.
+
+When it is done, execute the following command :
+python3 ../scripts/configure_camera.py -d /dev/video2 -c camera_configuration.yaml
+
+The auto calibration take a long time. 
+
+When it is done, you can change the brightness, contrast, saturation 
+hue and gamma and executre the script but without autocalibration to save time :
+python3 ../scripts/configure_camera.py -d /dev/video2 -c camera_configuration.yaml -i
+
+You can consult camera configuration by typing : 
+v4l2-ctl -d /dev/video2 -l
+
+Some advice to choose your parameters :
+ First setup all your parameters to the default values.
+ Then configure the parameter following this order : 
+  1) Exposure - augmente le temps d'exposition (utile quand il y a peu de lumière)
+  2) Brightness - augmente artificiellement la luminosité 
+                  (il vaut mieux régler le temps d'exposition) 
+  3) Saturation - augmente la vivacité des couleurs. Cela fait apparaître les 
+                  couleurs.
+  4) Contrast - augmente la différence de luminosité entre les parties claires 
+                et sombres  
+  6) Hue - Change la tonalité principale de l'image 
+           (par ex, une image à teinte bleu apparaît bleuté)
+  5) Gamma - paramètre non linéaire pour coder et décoder la luminsité dans les
+             vidéos et images digitales. 
+  6) Gain - augmente la sensibilité lumineurse quand les objets sont 
+            insuffisament éclairés. (il vaut mieux, améliorer physiquement 
+            l'éclairage ou modifier le temps d'exposition)
+
+ And finish with an auto-configuration.
+
+Here a french traduction/explanaition of all those terms :
+  ------------------------------------------
+  Hue
+  = 
+  Ton et teinte, noms et adjectifs de couleur 	
+  =
+  longeur d'onde dominate (colorimétrie)
+  =
+  Teinte, tonalité
+  ------------------------------------------
+  Brightness
+  =
+  Luminance
+  =
+  eclat, luminosité, brillance, clarté
+  ------------------------------------------
+  Contrast
+  =
+  contraste
+  =
+  différence de luminosité entre les parties claires et sombres 
+  ------------------------------------------
+  Saturation
+  =
+  puretés colorimétrique et d'excitation
+  =
+  vivacité de la couleur, coloration pur (s'oppose à couleur délavée)
+  --------------------------------------------------------------
+  Gamma
+  =
+  nonlinear operation used to encode and decode luminance 
+  =
+  opératon non linéaire utilisé pour codé et décodé la luminance 
+  --------------------------------------------------------------
+  Gain
+  =
+  enhances the light sensitivity when the illumination on the object is not 
+  sufficient.
+  = 
+  augmente artificiellement la sensitivité de la lumière quand l'éclairage des
+  objets est insufisant.
+  ------------------------------------------
+
+We advise you to use external lighting source.
+
+Normally, if you present now the charuco board on your camera, you will 
+obtain a clear image with detected markers positions.
+
+You can now stop the program that display the camera.
+
+################################################################################
+# Calibrating your cameras 
+################################################################################
+
+You need to have a configurated camera (see the previous section).
+All programs using /dev/video2 should be stoped now.
+
+We first capturing multiples videos to obtain some image to make the 
+calibration.
+
+To make some small videos containing cahruco board, execute the following 
+command to manually capture and select images for the 
+camera calibration:
+../build/capture_video -d=0 -w=5 -h=7 --sl=0.0333 --ml=0.02 --ci=2 video_1.avi
+
+  the option -d=0 setup the aruco dictionary equal to 0 (DICT_4X4_50)
+  the option -w=5 setup 5 squares in X direction for the charuco board
+  the option -h=12 setup 5 squares in Y direction for the charuco board
+  the option -sl=0.0333 setup a square length equals to 3.33 cm
+  the option -ml=0.02 setup a square length equals to 2.0 cm
+  the option --ci=2 is setup the camera device of /dev/video2
+
+(
+you can also replace the camera device by an input video file. You just have to
+replace the parameter --ci=2 by the parameter -v=video_input.avi
+)
+
+After some tests and some video captures, select all the videos you want to use 
+for the calibration. Concatenate all those videos into one final video by 
+typing :
+../build/concatenate_videos video_1.avi video_2.avi video_for_calibration.avi
+
+You can now produce a calibration file for your camera by typing :
+../build/calibrate_camera_charuco -d=0 -w=5 -h=7 --sl=0.0333 --ml=0.02 video_for_calibration.avi camera_calibration.yaml
+
+If camera calibration is a success, you will obtain a result like that one : 
+Re-projection Error for charuco: 0.662601
+Re-projection Error for Aruco: 1.53684
+Calibration saved to camera_calibration.yaml
+
+Re-projection error is computed as following : 
+  For each 2D image, for all aruco marker/charuco, we compute :
+    - it's 2D position P in the 2D image;
+    - an estimation of it's 3D position X in the 3D world;
+    - an estimation 2D position P' if we re-project X in the image by using 
+      the model of our calibrated camera projection Cam_projection.
+  So, we have 
+      P' = camera_projection(X)
+
+  The re-projection error is then equals to 
+      Error = sqrt( sum_P distance_2D(P, P')^2 )
+
+In the previous example, we obtain an average of re-projection error equals to
+1.53 pixel for an image resolution of 1920X1080.
+
+### TODO : 
+### # Making a calibration, getting image from a video 
+### ../programs/build/calibrate_camera_charuco_1 -d=0 -v=vid.avi --all_frames \
+###    --ml=0.02 --sl=0.03333 -w=7 -h=5  calibration.yaml --ci=2 -cx=960.0 \
+###    -cy=540.0 -fx=1066.8 -fy=1066.8
+
+
+################################################################################
+# Detecting the pose of your aruco markers in the frame of the camera :
+################################################################################
+
+You can now check the camera calibration works correctly by displaying the 
+position of each aruco markers in 3D :
+../build/detect_aruco_markers -d=0 --ci=2 -l=0.02 -c=camera_calibration.yaml
+
+  the option -d=0 setup the aruco dictionary equal to 0 (DICT_4X4_50)
+  the option --ci=2 is setup the camera device of /dev/video2
+  the option -l=0.02 setup a marker length equals to 0.02 m = 2 cm
+  the option -c=camera_calibration.yaml setup the file of the camera 
+      calibration.
+
+The program prints all the positions of the aruco markers in the frame of the 
+camera.
+All the positions of the markers are also displayed in the terminal.
+
+################################################################################
+# Detecting the pose of free aruco makers in the absolute frame with
+# multiple cameras
+###############################################################################
+
+We use multiple cameras and want to estimate the frame a some free aruco marker.
+To do that work, we know the position of some fixed aruco markers.
+
+We will use the scripts scripts/detect_markers_and_camera_inside_a_given_map.py.
+
+First, we need to create a file containing all information of the frames of
+all the fixed aruco makers in an absolute frame.
+
+You can copy and adapt the file config_example/map_of_aruco_marker.yaml.
+In that file two kinds of aruco markers are declared. The first are aruco
+marker coming from dictionary 0 and having a lenght of 3 cm. 
+The second one, are aruco coming from dictionary 1 and having a lenght of 5 cm.
+
+In that document, positions are a vectors that represent a translation 
+from the origin.
+Rotations are vectors that represent an axe of rotation. It's norm is equal to 
+the angle of rotation.
+
+
+We supose that we have a camera in /dev/video2 and /dev/video3.
+To obtain all the free markers present on the two cameras, you just have to 
+execute that following command line:
+python3  ../scripts/detect_markers_and_camera_inside_a_given_map.py --ci 2 3 -c camera_2_calibration.yaml camera_3_calibration.yaml -m map_of_aruco_markers.yaml
+
+
+################################################################################
+# Testing the precision of the pose of your aruco markers 
+################################################################################
+
+TODO
+ python3 ./scripts/detect_markers_and_camera_inside_a_given_map.py --ci 3 5 -c camera_1/camera_calibration.yaml camera_1/camera_calibration.yaml -m map_of_aruco_markers.yaml

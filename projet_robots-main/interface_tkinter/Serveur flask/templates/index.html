@@ -1,0 +1,45 @@
+<html>
+<body>
+<center>
+  <h1>PROJET ROBOT</h1>
+  <h2>Contrôle en WiFi</h2>
+  <hr>
+  <a id =avancer href="/A">AVANCER</a>
+  <p>
+    <a id =gauche href="/G">GAUCHE</a>
+    <a id = stop href="/S">STOP</a>
+    <a id = droite href="/D">DROITE</a>
+  </p>
+  <a id =reculer href="/R">RECULER</a>
+</center>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  $(document).ready(function() {
+    // Intercepte les clics sur les liens avec l'ID "link1" et "link2"
+    $('#droite, #gauche, #avancer, #reculer, #stop').click(function(event) {
+      event.preventDefault(); // Empêche le comportement par défaut du navigateur
+
+      // Récupère l'URL du lien
+      var url = $(this).attr('href');
+
+      // Effectue une requête AJAX vers l'URL
+      $.ajax({
+        url: url,
+        method: 'GET',
+        success: function(response) {
+          // Met à jour une partie spécifique de la page avec le contenu de la réponse
+          $('#content').html(response);
+        },
+        error: function() {
+          // Gère les erreurs
+          alert('Une erreur s\'est produite lors du chargement de la page.');
+        }
+      });
+    });
+  });
+</script>
+
+</body>
+</html>
+

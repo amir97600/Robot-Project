@@ -1,0 +1,39 @@
+- aruco_dictionary_id: 0
+  aruco_size: 0.03
+  map_of_aruco_markers:
+  - id: 0
+    position:
+    - 0.03
+    - -0.03
+    - 0.0
+    rotation:
+    - 0.0
+    - 0.0
+    - 0.0
+  - id: 1
+    position:
+    - 0.13
+    - -0.03
+    - 0.0
+    rotation:
+    - 0.0
+    - 0.0
+    - 0.0
+  - id: 2
+    position:
+    - 0.23
+    - -0.03
+    - 0.0
+    rotation:
+    - 0.0
+    - 0.0
+    - 0.0
+  - id: 3
+    position:
+    - 0.33000000000000007
+    - -0.03
+    - 0.0
+    rotation:
+    - 0.0
+    - 0.0
+    - 0.0
